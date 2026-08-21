@@ -11,6 +11,7 @@ import '../presentation/screens/task_details_screen.dart';
 
 import '../presentation/screens/splash_screen.dart';
 import '../presentation/screens/register_screen.dart';
+import '../presentation/screens/settings_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
@@ -48,6 +49,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/dashboard',
         builder: (context, state) => const DashboardScreen(),
+      ),
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) => const SettingsScreen(),
       ),
       GoRoute(
         path: '/project/:id',

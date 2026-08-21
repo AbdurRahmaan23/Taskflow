@@ -435,3 +435,18 @@ final debugErrorProvider = StateProvider<bool>((ref) {
   final dataSource = ref.watch(mockDataSourceProvider);
   return dataSource.simulateError;
 });
+
+// Theme Mode
+final themeModeProvider = StateNotifierProvider<ThemeModeNotifier, bool>((ref) {
+  return ThemeModeNotifier(ref.watch(sharedPreferencesProvider));
+});
+
+class ThemeModeNotifier extends StateNotifier<bool> {
+  final SharedPreferences _prefs;
+  ThemeModeNotifier(this._prefs) : super(_prefs.getBool('isDarkMode') ?? false);
+
+  void toggle() {
+    state = !state;
+    _prefs.setBool('isDarkMode', state);
+  }
+}

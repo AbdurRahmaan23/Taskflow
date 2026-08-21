@@ -16,23 +16,6 @@ class DashboardScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Projects'),
         actions: [
-          Row(
-            children: [
-              const Text('Offline:'),
-              Consumer(
-                builder: (context, ref, child) {
-                  final isOffline = ref.watch(debugOfflineProvider);
-                  return Switch(
-                    value: isOffline,
-                    onChanged: (val) {
-                      ref.read(mockDataSourceProvider).simulateOffline = val;
-                      ref.read(debugOfflineProvider.notifier).state = val;
-                    },
-                  );
-                },
-              ),
-            ],
-          ),
           IconButton(
             icon: const Icon(Icons.notifications),
             onPressed: () {
@@ -43,8 +26,10 @@ class DashboardScreen extends ConsumerWidget {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => ref.read(authStateProvider.notifier).logout(),
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              context.push('/settings');
+            },
           )
         ],
       ),

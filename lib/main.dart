@@ -58,6 +58,7 @@ class _TaskFlowAppState extends ConsumerState<TaskFlowApp> {
   @override
   Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
+    final isDark = ref.watch(themeModeProvider);
 
     return Listener(
       onPointerDown: (_) => _resetTimer(),
@@ -72,7 +73,7 @@ class _TaskFlowAppState extends ConsumerState<TaskFlowApp> {
         darkTheme: ThemeData.dark(useMaterial3: true).copyWith(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.dark),
         ),
-        themeMode: ThemeMode.system,
+        themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
         routerConfig: router,
       ),
     );
