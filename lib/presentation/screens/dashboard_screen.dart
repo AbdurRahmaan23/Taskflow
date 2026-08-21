@@ -56,85 +56,83 @@ class DashboardScreen extends ConsumerWidget {
               ref.invalidate(projectsProvider);
               await ref.read(projectsProvider.future);
             },
-            child: projectsAsync.when(
-              data: (projects) {
-                if (projects.isEmpty) {
-                  return const Center(child: Text('No projects found.'));
-                }
-                return ListView.builder(
-                  itemCount: projects.length,
-                  itemBuilder: (context, index) {
-                    final project = projects[index];
-                    return ListTile(
-                      title: Text(project.name),
-                      subtitle: Text(project.description),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('${project.taskCount} tasks'),
-                          if (user.role == 'org_admin') ...[
-                            IconButton(
-                              icon: const Icon(Icons.edit, color: Colors.blue),
-                              onPressed: () {
-                                _showEditProjectDialog(context, ref, project);
-                              },
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () {
-                                _confirmDeleteProject(context, ref, project.id);
-                              },
-                            ),
-                          ],
-                        ],
-                      ),
-                      onTap: () {
-                        context.push('/project/${project.id}');
+              child: projectsAsync.when(
+                data: (projects) {
+                  final isOfflineData = ref.read(projectsProvider.notifier).isOffline;
+                  
+                  Widget content;
+                  if (projects.isEmpty) {
+                    content = const Center(child: Text('No projects found.'));
+                  } else {
+                    content = ListView.builder(
+                      itemCount: projects.length,
+                      itemBuilder: (context, index) {
+                        final project = projects[index];
+                        return ListTile(
+                          title: Text(project.name),
+                          subtitle: Text(project.description),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text('${project.taskCount} tasks'),
+                              if (user.role == 'org_admin') ...[
+                                IconButton(
+                                  icon: const Icon(Icons.edit, color: Colors.blue),
+                                  onPressed: () {
+                                    _showEditProjectDialog(context, ref, project);
+                                  },
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete, color: Colors.red),
+                                  onPressed: () {
+                                    _confirmDeleteProject(context, ref, project.id);
+                                  },
+                                ),
+                              ],
+                            ],
+                          ),
+                          onTap: () {
+                            context.push('/project/${project.id}');
+                          },
+                        );
                       },
                     );
-                  },
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, st) {
-                if (projectsAsync.hasValue && projectsAsync.value!.isNotEmpty) {
-                  // Preserve data and show banner
-                  return Column(
-                    children: [
-                      Container(color: Colors.red, width: double.infinity, padding: const EdgeInsets.all(8), child: const Text('Offline Mode - Showing cached data', style: TextStyle(color: Colors.white), textAlign: TextAlign.center)),
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: projectsAsync.value!.length,
-                          itemBuilder: (context, index) {
-                            final project = projectsAsync.value![index];
-                            return ListTile(
-                              title: Text(project.name),
-                              subtitle: Text(project.description),
-                              trailing: Text('${project.taskCount} tasks'),
-                              onTap: () => context.push('/project/${project.id}'),
-                            );
-                          },
+                  }
+
+                  if (isOfflineData) {
+                    return Column(
+                      children: [
+                        Container(
+                          color: Colors.orange,
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(8),
+                          child: const Text('⚠️ Offline Mode - Displaying cached data', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                         ),
-                      ),
-                    ],
+                        Expanded(child: content),
+                      ],
+                    );
+                  }
+                  
+                  return content;
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (err, st) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.wifi_off, size: 48, color: Colors.grey),
+                        const SizedBox(height: 16),
+                        Text('Error: $err', textAlign: TextAlign.center),
+                        ElevatedButton(
+                          onPressed: () => ref.invalidate(projectsProvider),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
                   );
-                }
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.wifi_off, size: 48, color: Colors.grey),
-                      const SizedBox(height: 16),
-                      Text('Offline or Error: $err', textAlign: TextAlign.center),
-                      ElevatedButton(
-                        onPressed: () => ref.invalidate(projectsProvider),
-                        child: const Text('Retry'),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
+                },
+              ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),

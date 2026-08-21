@@ -4,10 +4,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/router.dart';
 import 'presentation/providers/providers.dart';
 
-void main() {
+import 'package:shared_preferences/shared_preferences.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  
   runApp(
-    const ProviderScope(
-      child: TaskFlowApp(),
+    ProviderScope(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+      ],
+      child: const TaskFlowApp(),
     ),
   );
 }

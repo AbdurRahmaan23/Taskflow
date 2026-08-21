@@ -32,70 +32,103 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
         children: [
           _buildFilterRow(members),
           Expanded(
-            child: tasksAsync.when(
-              data: (tasks) {
-                // Apply filters
-                var filtered = tasks;
-                if (_filterStatus != null && _filterStatus!.isNotEmpty) {
-                  filtered = filtered.where((t) => t.status == _filterStatus).toList();
-                }
-                if (_filterPriority != null && _filterPriority!.isNotEmpty) {
-                  filtered = filtered.where((t) => t.priority == _filterPriority).toList();
-                }
-                if (_filterAssignee != null && _filterAssignee!.isNotEmpty) {
-                  filtered = filtered.where((t) => t.assigneeId == _filterAssignee).toList();
-                }
-                if (_filterDueDate != null) {
-                  filtered = filtered.where((t) {
-                    if (t.dueDate == null) return false;
-                    final due = DateTime.tryParse(t.dueDate!);
-                    if (due == null) return false;
-                    return due.year == _filterDueDate!.year &&
-                           due.month == _filterDueDate!.month &&
-                           due.day == _filterDueDate!.day;
-                  }).toList();
-                }
+              child: tasksAsync.when(
+                data: (tasks) {
+                  final isOfflineData = ref.read(tasksProvider(widget.projectId).notifier).isOffline;
+                  
+                  var filtered = tasks;
+                  if (_filterStatus != null && _filterStatus!.isNotEmpty) {
+                    filtered = filtered.where((t) => t.status == _filterStatus).toList();
+                  }
+                  if (_filterPriority != null && _filterPriority!.isNotEmpty) {
+                    filtered = filtered.where((t) => t.priority == _filterPriority).toList();
+                  }
+                  if (_filterAssignee != null && _filterAssignee!.isNotEmpty) {
+                    filtered = filtered.where((t) => t.assigneeId == _filterAssignee).toList();
+                  }
+                  if (_filterDueDate != null) {
+                    filtered = filtered.where((t) {
+                      if (t.dueDate == null) return false;
+                      final due = DateTime.tryParse(t.dueDate!);
+                      if (due == null) return false;
+                      return due.year == _filterDueDate!.year &&
+                             due.month == _filterDueDate!.month &&
+                             due.day == _filterDueDate!.day;
+                    }).toList();
+                  }
 
-                if (filtered.isEmpty) {
-                  return const Center(child: Text('No tasks found.'));
-                }
+                  Widget content;
+                  if (filtered.isEmpty) {
+                    content = const Center(child: Text('No tasks found.'));
+                  } else {
+                    final todoTasks = filtered.where((t) => t.status == 'todo').toList();
+                    final inProgressTasks = filtered.where((t) => t.status == 'in_progress').toList();
+                    final reviewTasks = filtered.where((t) => t.status == 'review').toList();
+                    final doneTasks = filtered.where((t) => t.status == 'done').toList();
 
-                final todoTasks = filtered.where((t) => t.status == 'todo').toList();
-                final inProgressTasks = filtered.where((t) => t.status == 'in_progress').toList();
-                final reviewTasks = filtered.where((t) => t.status == 'review').toList();
-                final doneTasks = filtered.where((t) => t.status == 'done').toList();
-
-                return RefreshIndicator(
-                  onRefresh: () async {
-                    ref.invalidate(tasksProvider(widget.projectId));
-                    await ref.read(tasksProvider(widget.projectId).future);
-                  },
-                  child: ListView(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            _buildSummaryCard('To Do', todoTasks.length, Colors.blue),
-                            _buildSummaryCard('In Progress', inProgressTasks.length, Colors.orange),
-                            _buildSummaryCard('Review', reviewTasks.length, Colors.purple),
-                            _buildSummaryCard('Done', doneTasks.length, Colors.green),
-                          ],
+                    content = ListView(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _buildSummaryCard('To Do', todoTasks.length, Colors.blue),
+                              _buildSummaryCard('In Progress', inProgressTasks.length, Colors.orange),
+                              _buildSummaryCard('Review', reviewTasks.length, Colors.purple),
+                              _buildSummaryCard('Done', doneTasks.length, Colors.green),
+                            ],
+                          ),
                         ),
+                        _buildTaskSection('To Do', todoTasks, members, context),
+                        _buildTaskSection('In Progress', inProgressTasks, members, context),
+                        _buildTaskSection('Review', reviewTasks, members, context),
+                        _buildTaskSection('Done', doneTasks, members, context),
+                      ],
+                    );
+                  }
+
+                  Widget mainWidget = RefreshIndicator(
+                    onRefresh: () async {
+                      ref.invalidate(tasksProvider(widget.projectId));
+                      await ref.read(tasksProvider(widget.projectId).future);
+                    },
+                    child: content,
+                  );
+
+                  if (isOfflineData) {
+                    return Column(
+                      children: [
+                        Container(
+                          color: Colors.orange,
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(8),
+                          child: const Text('⚠️ Offline Mode - Displaying cached tasks', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                        ),
+                        Expanded(child: mainWidget),
+                      ],
+                    );
+                  }
+
+                  return mainWidget;
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (err, _) => Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.wifi_off, size: 48, color: Colors.grey),
+                      const SizedBox(height: 16),
+                      Text('Error: $err', textAlign: TextAlign.center),
+                      ElevatedButton(
+                        onPressed: () => ref.invalidate(tasksProvider(widget.projectId)),
+                        child: const Text('Retry'),
                       ),
-                      _buildTaskSection('To Do', todoTasks, members, context),
-                      _buildTaskSection('In Progress', inProgressTasks, members, context),
-                      _buildTaskSection('Review', reviewTasks, members, context),
-                      _buildTaskSection('Done', doneTasks, members, context),
                     ],
                   ),
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, _) => Center(child: Text('Error: $err')),
+                ),
+              ),
             ),
-          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
