@@ -72,13 +72,20 @@ class DashboardScreen extends ConsumerWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text('${project.taskCount} tasks'),
-                          if (user.role == 'org_admin')
+                          if (user.role == 'org_admin') ...[
+                            IconButton(
+                              icon: const Icon(Icons.edit, color: Colors.blue),
+                              onPressed: () {
+                                _showEditProjectDialog(context, ref, project);
+                              },
+                            ),
                             IconButton(
                               icon: const Icon(Icons.delete, color: Colors.red),
                               onPressed: () {
                                 _confirmDeleteProject(context, ref, project.id);
                               },
                             ),
+                          ],
                         ],
                       ),
                       onTap: () {
@@ -173,18 +180,77 @@ class DashboardScreen extends ConsumerWidget {
             ),
             ElevatedButton(
               onPressed: () async {
-                final newProject = Project(
-                  id: 'proj_${DateTime.now().millisecondsSinceEpoch}',
-                  orgId: orgId,
-                  name: titleController.text,
-                  description: descController.text,
-                  taskCount: 0,
-                  status: 'active',
-                  createdAt: DateTime.now(),
-                );
-                await ref.read(projectRepositoryProvider).createProject(newProject);
-                ref.invalidate(projectsProvider);
-                if (context.mounted) Navigator.pop(context);
+                try {
+                  final newProject = Project(
+                    id: 'proj_${DateTime.now().millisecondsSinceEpoch}',
+                    orgId: orgId,
+                    name: titleController.text,
+                    description: descController.text,
+                    taskCount: 0,
+                    status: 'active',
+                    createdAt: DateTime.now(),
+                  );
+                  await ref.read(projectRepositoryProvider).createProject(newProject);
+                  ref.invalidate(projectsProvider);
+                  if (context.mounted) Navigator.pop(context);
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                    Navigator.pop(context);
+                  }
+                }
+              },
+              child: const Text('Create'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showEditProjectDialog(BuildContext context, WidgetRef ref, Project project) {
+    final titleController = TextEditingController(text: project.name);
+    final descController = TextEditingController(text: project.description);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Edit Project'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: const InputDecoration(labelText: 'Name'),
+              ),
+              TextField(
+                controller: descController,
+                decoration: const InputDecoration(labelText: 'Description'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                try {
+                  final updatedProject = project.copyWith(
+                    name: titleController.text,
+                    description: descController.text,
+                  );
+                  await ref.read(projectRepositoryProvider).updateProject(updatedProject);
+                  ref.invalidate(projectsProvider);
+                  if (context.mounted) Navigator.pop(context);
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                    Navigator.pop(context);
+                  }
+                }
               },
               child: const Text('Create'),
             ),
@@ -209,9 +275,16 @@ class DashboardScreen extends ConsumerWidget {
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
               onPressed: () async {
-                await ref.read(projectRepositoryProvider).deleteProject(projectId);
-                ref.invalidate(projectsProvider);
-                if (context.mounted) Navigator.pop(context);
+                try {
+                  await ref.read(projectRepositoryProvider).deleteProject(projectId);
+                  ref.invalidate(projectsProvider);
+                  if (context.mounted) Navigator.pop(context);
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                    Navigator.pop(context);
+                  }
+                }
               },
               child: const Text('Delete', style: TextStyle(color: Colors.white)),
             ),

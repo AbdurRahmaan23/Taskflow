@@ -108,8 +108,16 @@ class AuthRepositoryImpl implements AuthRepository {
 
 class ProjectRepositoryImpl implements ProjectRepository {
   final MockDataSource dataSource;
+  final AuthRepository authRepository;
 
-  ProjectRepositoryImpl(this.dataSource);
+  ProjectRepositoryImpl(this.dataSource, this.authRepository);
+
+  Future<void> _checkAdmin() async {
+    final user = await authRepository.getCurrentUser();
+    if (user.role != 'org_admin') {
+      throw Exception('Unauthorized: Only org admins can perform this action');
+    }
+  }
 
   @override
   Future<List<Project>> getProjects(String orgId) => dataSource.getProjects(orgId);
@@ -122,13 +130,22 @@ class ProjectRepositoryImpl implements ProjectRepository {
   }
 
   @override
-  Future<Project> createProject(Project project) => dataSource.createProject(project);
+  Future<Project> createProject(Project project) async {
+    await _checkAdmin();
+    return dataSource.createProject(project);
+  }
 
   @override
-  Future<Project> updateProject(Project project) => dataSource.updateProject(project);
+  Future<Project> updateProject(Project project) async {
+    await _checkAdmin();
+    return dataSource.updateProject(project);
+  }
 
   @override
-  Future<void> deleteProject(String projectId) => dataSource.deleteProject(projectId);
+  Future<void> deleteProject(String projectId) async {
+    await _checkAdmin();
+    return dataSource.deleteProject(projectId);
+  }
 }
 
 class TaskRepositoryImpl implements TaskRepository {

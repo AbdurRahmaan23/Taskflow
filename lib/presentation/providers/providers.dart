@@ -21,7 +21,7 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
 });
 
 final projectRepositoryProvider = Provider<ProjectRepository>((ref) {
-  return ProjectRepositoryImpl(ref.watch(mockDataSourceProvider));
+  return ProjectRepositoryImpl(ref.watch(mockDataSourceProvider), ref.watch(authRepositoryProvider));
 });
 
 final taskRepositoryProvider = Provider<TaskRepository>((ref) {

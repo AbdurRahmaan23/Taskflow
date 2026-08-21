@@ -55,6 +55,18 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
                   },
                   child: ListView(
                     children: [
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            _buildSummaryCard('To Do', todoTasks.length, Colors.blue),
+                            _buildSummaryCard('In Progress', inProgressTasks.length, Colors.orange),
+                            _buildSummaryCard('Review', reviewTasks.length, Colors.purple),
+                            _buildSummaryCard('Done', doneTasks.length, Colors.green),
+                          ],
+                        ),
+                      ),
                       _buildTaskSection('To Do', todoTasks, context),
                       _buildTaskSection('In Progress', inProgressTasks, context),
                       _buildTaskSection('Review', reviewTasks, context),
@@ -191,6 +203,16 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
             context.push('/task/${task.id}');
           },
         )),
+      ],
+    );
+  }
+
+  Widget _buildSummaryCard(String title, int count, Color color) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(count.toString(), style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: color)),
+        Text(title, style: const TextStyle(fontSize: 12)),
       ],
     );
   }
