@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.taskflow.taskflow"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../domain/models/models.dart';
 import '../providers/providers.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -31,6 +32,15 @@ class DashboardScreen extends ConsumerWidget {
                 },
               ),
             ],
+          ),
+          IconButton(
+            icon: const Icon(Icons.notifications),
+            onPressed: () {
+              final user = ref.read(authStateProvider).value;
+              if (user != null) {
+                _showNotificationsDialog(context, ref, user.id);
+              }
+            },
           ),
           IconButton(
             icon: const Icon(Icons.logout),
@@ -205,6 +215,51 @@ class DashboardScreen extends ConsumerWidget {
               },
               child: const Text('Delete', style: TextStyle(color: Colors.white)),
             ),
+          ],
+        );
+      },
+    );
+  void _showNotificationsDialog(BuildContext context, WidgetRef ref, String userId) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Notifications'),
+          content: SizedBox(
+            width: double.maxFinite,
+            height: 300,
+            child: Consumer(
+              builder: (context, ref, child) {
+                final notifsAsync = ref.watch(notificationsProvider(userId));
+                return notifsAsync.when(
+                  data: (notifs) {
+                    if (notifs.isEmpty) return const Center(child: Text('No notifications'));
+                    return ListView.builder(
+                      itemCount: notifs.length,
+                      itemBuilder: (context, index) {
+                        final notif = notifs[index];
+                        return ListTile(
+                          title: Text(notif.title, style: TextStyle(fontWeight: notif.isRead ? FontWeight.normal : FontWeight.bold)),
+                          subtitle: Text(notif.message),
+                          trailing: notif.isRead ? null : IconButton(
+                            icon: const Icon(Icons.check),
+                            onPressed: () async {
+                              await ref.read(notificationRepositoryProvider).markAsRead(notif.id);
+                              ref.invalidate(notificationsProvider(userId));
+                            },
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (err, _) => Center(child: Text('Error: $err')),
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
           ],
         );
       },

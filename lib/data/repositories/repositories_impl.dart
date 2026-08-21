@@ -102,7 +102,34 @@ class TaskRepositoryImpl implements TaskRepository {
   Future<Task> updateTask(Task task) => dataSource.updateTask(task);
 
   @override
-  Future<void> deleteTask(String taskId) => dataSource.deleteTask(taskId);
+  Future<void> deleteTask(String taskId) {
+    return dataSource.deleteTask(taskId);
+  }
+
+  @override
+  Future<List<Comment>> getComments(String taskId) {
+    return dataSource.getComments(taskId);
+  }
+
+  @override
+  Future<Comment> createComment(Comment comment) {
+    return dataSource.createComment(comment);
+  }
+}
+
+class NotificationRepositoryImpl implements NotificationRepository {
+  final MockDataSource _dataSource;
+  NotificationRepositoryImpl(this._dataSource);
+
+  @override
+  Future<List<AppNotification>> getNotifications(String userId) {
+    return _dataSource.getNotifications(userId);
+  }
+
+  @override
+  Future<void> markAsRead(String notificationId) {
+    return _dataSource.markNotificationRead(notificationId);
+  }
 }
 
 class UserRepositoryImpl implements UserRepository {

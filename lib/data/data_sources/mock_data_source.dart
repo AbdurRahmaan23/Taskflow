@@ -148,4 +148,40 @@ class MockDataSource {
     }
     throw Exception('User not found');
   }
+
+  Future<List<Comment>> getComments(String taskId) async {
+    await init();
+    await _simulateDelay();
+    final List comments = _data!['comments'] ?? [];
+    return comments
+        .map((e) => Comment.fromJson(e))
+        .where((c) => c.taskId == taskId)
+        .toList();
+  }
+
+  Future<Comment> createComment(Comment comment) async {
+    await init();
+    await _simulateDelay();
+    _data!['comments'].add(comment.toJson());
+    return comment;
+  }
+
+  Future<List<AppNotification>> getNotifications(String userId) async {
+    await init();
+    await _simulateDelay();
+    final List notifs = _data!['notifications'] ?? [];
+    return notifs
+        .map((e) => AppNotification.fromJson(e))
+        .where((n) => n.userId == userId)
+        .toList();
+  }
+
+  Future<void> markNotificationRead(String notificationId) async {
+    await init();
+    await _simulateDelay();
+    final index = _data!['notifications'].indexWhere((n) => n['id'] == notificationId);
+    if (index != -1) {
+      _data!['notifications'][index]['is_read'] = true;
+    }
+  }
 }

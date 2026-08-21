@@ -32,6 +32,10 @@ final userRepositoryProvider = Provider<UserRepository>((ref) {
   return UserRepositoryImpl(ref.watch(mockDataSourceProvider));
 });
 
+final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
+  return NotificationRepositoryImpl(ref.watch(mockDataSourceProvider));
+});
+
 // State Management: Auth State
 final authStateProvider = StateNotifierProvider<AuthNotifier, AsyncValue<AuthCredentials?>>((ref) {
   return AuthNotifier(ref.watch(authRepositoryProvider));
@@ -98,6 +102,16 @@ final projectsProvider = FutureProvider<List<Project>>((ref) async {
 final tasksProvider = FutureProvider.family<List<Task>, String>((ref, projectId) async {
   final repo = ref.watch(taskRepositoryProvider);
   return repo.getTasks(projectId);
+});
+
+final commentsProvider = FutureProvider.family<List<Comment>, String>((ref, taskId) async {
+  final repo = ref.watch(taskRepositoryProvider);
+  return repo.getComments(taskId);
+});
+
+final notificationsProvider = FutureProvider.family<List<AppNotification>, String>((ref, userId) async {
+  final repo = ref.watch(notificationRepositoryProvider);
+  return repo.getNotifications(userId);
 });
 
 // Toggles for testing errors & offline

@@ -15,6 +15,7 @@ class _TaskDetailsScreenState extends ConsumerState<TaskDetailsScreen> {
   Task? task;
   List<OrgMember>? orgMembers;
   bool isLoading = true;
+  final _commentController = TextEditingController();
 
   @override
   void initState() {
@@ -24,7 +25,7 @@ class _TaskDetailsScreenState extends ConsumerState<TaskDetailsScreen> {
 
   Future<void> _loadData() async {
     try {
-      final auth = await ref.read(authStateProvider.future);
+      final auth = ref.read(authStateProvider).value;
       if (auth == null) return;
       
       final repo = ref.read(taskRepositoryProvider);
@@ -129,9 +130,64 @@ class _TaskDetailsScreenState extends ConsumerState<TaskDetailsScreen> {
               ],
               onChanged: _updateAssignee,
             ),
+            const SizedBox(height: 16),
+            const Divider(),
+            const Text('Comments', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            Expanded(
+              child: Consumer(
+                builder: (context, ref, child) {
+                  final commentsAsync = ref.watch(commentsProvider(widget.taskId));
+                  return commentsAsync.when(
+                    data: (comments) {
+                      if (comments.isEmpty) return const Center(child: Text('No comments yet.'));
+                      return ListView.builder(
+                        itemCount: comments.length,
+                        itemBuilder: (context, index) {
+                          final c = comments[index];
+                          return ListTile(
+                            title: Text(c.content),
+                            subtitle: Text('By ${c.userId} on ${c.createdAt.toLocal().toString().split('.')[0]}'),
+                          );
+                        },
+                      );
+                    },
+                    loading: () => const Center(child: CircularProgressIndicator()),
+                    error: (e, _) => Center(child: Text('Error: $e')),
+                  );
+                },
+              ),
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _commentController,
+                    decoration: const InputDecoration(hintText: 'Add a comment...'),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.send),
+                  onPressed: () async {
+                    if (_commentController.text.trim().isEmpty) return;
+                    final auth = ref.read(authStateProvider).value;
+                    if (auth == null) return;
+                    
+                    final newComment = Comment(
+                      id: 'comment_${DateTime.now().millisecondsSinceEpoch}',
+                      taskId: widget.taskId,
+                      userId: auth.email, // using email as a simple user ID reference for mock
+                      content: _commentController.text.trim(),
+                      createdAt: DateTime.now(),
+                    );
+                    await ref.read(taskRepositoryProvider).createComment(newComment);
+                    _commentController.clear();
+                    ref.invalidate(commentsProvider(widget.taskId));
+                  },
+                )
+              ],
+            )
           ],
         ),
-      ),
     );
   }
 }

@@ -124,3 +124,39 @@ Map<String, dynamic> _$MockLoginResponseToJson(_MockLoginResponse instance) =>
       'access_token_expires_in_seconds': instance.accessTokenExpiresIn,
       'refresh_token_expires_in_seconds': instance.refreshTokenExpiresIn,
     };
+
+_Comment _$CommentFromJson(Map<String, dynamic> json) => _Comment(
+  id: json['id'] as String,
+  taskId: json['task_id'] as String,
+  userId: json['user_id'] as String,
+  content: json['content'] as String,
+  createdAt: DateTime.parse(json['created_at'] as String),
+);
+
+Map<String, dynamic> _$CommentToJson(_Comment instance) => <String, dynamic>{
+  'id': instance.id,
+  'task_id': instance.taskId,
+  'user_id': instance.userId,
+  'content': instance.content,
+  'created_at': instance.createdAt.toIso8601String(),
+};
+
+_AppNotification _$AppNotificationFromJson(Map<String, dynamic> json) =>
+    _AppNotification(
+      id: json['id'] as String,
+      userId: json['user_id'] as String,
+      title: json['title'] as String,
+      message: json['message'] as String,
+      isRead: json['is_read'] as bool,
+      createdAt: DateTime.parse(json['created_at'] as String),
+    );
+
+Map<String, dynamic> _$AppNotificationToJson(_AppNotification instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'user_id': instance.userId,
+      'title': instance.title,
+      'message': instance.message,
+      'is_read': instance.isRead,
+      'created_at': instance.createdAt.toIso8601String(),
+    };

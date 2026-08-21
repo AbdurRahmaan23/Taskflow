@@ -4,7 +4,7 @@ part 'models.freezed.dart';
 part 'models.g.dart';
 
 @freezed
-class Organization with _$Organization {
+abstract class Organization with _$Organization {
   const factory Organization({
     required String id,
     required String name,
@@ -15,7 +15,7 @@ class Organization with _$Organization {
 }
 
 @freezed
-class User with _$User {
+abstract class User with _$User {
   const factory User({
     required String id,
     required String name,
@@ -27,7 +27,7 @@ class User with _$User {
 }
 
 @freezed
-class OrgMember with _$OrgMember {
+abstract class OrgMember with _$OrgMember {
   const factory OrgMember({
     @JsonKey(name: 'org_id') required String orgId,
     @JsonKey(name: 'user_id') required String userId,
@@ -38,7 +38,7 @@ class OrgMember with _$OrgMember {
 }
 
 @freezed
-class Project with _$Project {
+abstract class Project with _$Project {
   const factory Project({
     required String id,
     @JsonKey(name: 'org_id') required String orgId,
@@ -53,7 +53,7 @@ class Project with _$Project {
 }
 
 @freezed
-class Task with _$Task {
+abstract class Task with _$Task {
   const factory Task({
     required String id,
     @JsonKey(name: 'project_id') required String projectId,
@@ -70,7 +70,7 @@ class Task with _$Task {
 }
 
 @freezed
-class AuthCredentials with _$AuthCredentials {
+abstract class AuthCredentials with _$AuthCredentials {
   const factory AuthCredentials({
     required String email,
     required String password,
@@ -82,7 +82,7 @@ class AuthCredentials with _$AuthCredentials {
 }
 
 @freezed
-class MockLoginResponse with _$MockLoginResponse {
+abstract class MockLoginResponse with _$MockLoginResponse {
   const factory MockLoginResponse({
     @JsonKey(name: 'access_token') required String accessToken,
     @JsonKey(name: 'refresh_token') required String refreshToken,
@@ -91,4 +91,31 @@ class MockLoginResponse with _$MockLoginResponse {
   }) = _MockLoginResponse;
 
   factory MockLoginResponse.fromJson(Map<String, dynamic> json) => _$MockLoginResponseFromJson(json);
+}
+
+@freezed
+abstract class Comment with _$Comment {
+  const factory Comment({
+    required String id,
+    @JsonKey(name: 'task_id') required String taskId,
+    @JsonKey(name: 'user_id') required String userId,
+    required String content,
+    @JsonKey(name: 'created_at') required DateTime createdAt,
+  }) = _Comment;
+
+  factory Comment.fromJson(Map<String, dynamic> json) => _$CommentFromJson(json);
+}
+
+@freezed
+abstract class AppNotification with _$AppNotification {
+  const factory AppNotification({
+    required String id,
+    @JsonKey(name: 'user_id') required String userId,
+    required String title,
+    required String message,
+    @JsonKey(name: 'is_read') required bool isRead,
+    @JsonKey(name: 'created_at') required DateTime createdAt,
+  }) = _AppNotification;
+
+  factory AppNotification.fromJson(Map<String, dynamic> json) => _$AppNotificationFromJson(json);
 }

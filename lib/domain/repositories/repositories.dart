@@ -23,6 +23,13 @@ abstract class TaskRepository {
   Future<Task> createTask(Task task);
   Future<Task> updateTask(Task task);
   Future<void> deleteTask(String taskId);
+  Future<List<Comment>> getComments(String taskId);
+  Future<Comment> createComment(Comment comment);
+}
+
+abstract class NotificationRepository {
+  Future<List<AppNotification>> getNotifications(String userId);
+  Future<void> markAsRead(String notificationId);
 }
 
 abstract class UserRepository {

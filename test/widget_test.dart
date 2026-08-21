@@ -13,6 +13,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     // Verify that the login button is present
     expect(find.text('Login'), findsOneWidget);
