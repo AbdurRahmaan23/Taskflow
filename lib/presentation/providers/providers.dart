@@ -96,18 +96,42 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthCredentials?>> {
 }
 
 // State Management: Projects
-final projectsProvider = FutureProvider<List<Project>>((ref) async {
-  final authState = ref.watch(authStateProvider);
-  return authState.when(
-    data: (user) async {
-      if (user == null) return [];
-      final repo = ref.watch(projectRepositoryProvider);
-      return repo.getProjects(user.orgId);
-    },
-    loading: () => [],
-    error: (_, __) => [],
-  );
+final projectsProvider = AsyncNotifierProvider<ProjectsNotifier, List<Project>>(() {
+  return ProjectsNotifier();
 });
+
+class ProjectsNotifier extends AsyncNotifier<List<Project>> {
+  @override
+  Future<List<Project>> build() async {
+    final user = ref.watch(authStateProvider).value;
+    if (user == null) return [];
+    return ref.watch(projectRepositoryProvider).getProjects(user.orgId);
+  }
+
+  Future<void> createProject(Project project) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      await ref.read(projectRepositoryProvider).createProject(project);
+      return ref.read(projectRepositoryProvider).getProjects(ref.read(authStateProvider).value!.orgId);
+    });
+  }
+
+  Future<void> updateProject(Project project) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      await ref.read(projectRepositoryProvider).updateProject(project);
+      return ref.read(projectRepositoryProvider).getProjects(ref.read(authStateProvider).value!.orgId);
+    });
+  }
+
+  Future<void> deleteProject(String projectId) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      await ref.read(projectRepositoryProvider).deleteProject(projectId);
+      return ref.read(projectRepositoryProvider).getProjects(ref.read(authStateProvider).value!.orgId);
+    });
+  }
+}
 
 // State Management: Org Members
 final orgMembersProvider = FutureProvider<List<User>>((ref) async {
@@ -124,9 +148,43 @@ final orgMembersProvider = FutureProvider<List<User>>((ref) async {
 });
 
 // State Management: Tasks for a project
-final tasksProvider = FutureProvider.family<List<Task>, String>((ref, projectId) async {
-  final repo = ref.watch(taskRepositoryProvider);
-  return repo.getTasks(projectId);
+final tasksProvider = AsyncNotifierProviderFamily<TasksNotifier, List<Task>, String>(() {
+  return TasksNotifier();
+});
+
+class TasksNotifier extends FamilyAsyncNotifier<List<Task>, String> {
+  @override
+  Future<List<Task>> build(String arg) async {
+    return ref.watch(taskRepositoryProvider).getTasks(arg);
+  }
+
+  Future<void> createTask(Task task) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      await ref.read(taskRepositoryProvider).createTask(task);
+      return ref.read(taskRepositoryProvider).getTasks(arg);
+    });
+  }
+
+  Future<void> updateTask(Task task) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      await ref.read(taskRepositoryProvider).updateTask(task);
+      return ref.read(taskRepositoryProvider).getTasks(arg);
+    });
+  }
+
+  Future<void> deleteTask(String taskId) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      await ref.read(taskRepositoryProvider).deleteTask(taskId);
+      return ref.read(taskRepositoryProvider).getTasks(arg);
+    });
+  }
+}
+
+final taskProvider = FutureProvider.family<Task, String>((ref, taskId) async {
+  return ref.watch(taskRepositoryProvider).getTaskById(taskId);
 });
 
 final commentsProvider = FutureProvider.family<List<Comment>, String>((ref, taskId) async {

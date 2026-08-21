@@ -159,9 +159,7 @@ class TaskRepositoryImpl implements TaskRepository {
   Future<List<Task>> getTasks(String projectId) => dataSource.getTasks(projectId);
 
   @override
-  Future<Task> getTaskById(String taskId) {
-    throw UnimplementedError('Not implemented yet');
-  }
+  Future<Task> getTaskById(String taskId) => dataSource.getTaskById(taskId);
 
   @override
   Future<Task> createTask(Task task) => dataSource.createTask(task);

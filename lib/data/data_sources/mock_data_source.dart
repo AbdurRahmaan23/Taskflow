@@ -94,6 +94,14 @@ class MockDataSource {
         .toList();
   }
 
+  Future<Task> getTaskById(String taskId) async {
+    await init();
+    await _simulateDelay();
+    final List tasks = _data!['tasks'] ?? [];
+    final t = tasks.firstWhere((e) => e['id'] == taskId, orElse: () => throw Exception('Task not found'));
+    return Task.fromJson(t);
+  }
+
   Future<Task> createTask(Task task) async {
     await init();
     await _simulateDelay();

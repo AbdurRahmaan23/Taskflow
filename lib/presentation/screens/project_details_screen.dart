@@ -256,9 +256,15 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
                       dueDate: selectedDueDate?.toIso8601String(),
                       createdAt: DateTime.now(),
                     );
-                    await ref.read(taskRepositoryProvider).createTask(newTask);
-                    ref.invalidate(tasksProvider(widget.projectId));
-                    if (context.mounted) Navigator.pop(context);
+                    await ref.read(tasksProvider(widget.projectId).notifier).createTask(newTask);
+                    if (context.mounted) {
+                      final error = ref.read(tasksProvider(widget.projectId)).error;
+                      if (error != null) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.toString())));
+                      } else {
+                        Navigator.pop(context);
+                      }
+                    }
                   },
                   child: const Text('Create'),
                 ),
@@ -287,8 +293,13 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
             trailing: IconButton(
               icon: const Icon(Icons.delete, color: Colors.red),
               onPressed: () async {
-                await ref.read(taskRepositoryProvider).deleteTask(task.id);
-                ref.invalidate(tasksProvider(widget.projectId));
+                await ref.read(tasksProvider(widget.projectId).notifier).deleteTask(task.id);
+                if (context.mounted) {
+                  final error = ref.read(tasksProvider(widget.projectId)).error;
+                  if (error != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.toString())));
+                  }
+                }
               },
             ),
             onTap: () {

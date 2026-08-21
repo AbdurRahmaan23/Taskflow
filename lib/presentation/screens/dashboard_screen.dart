@@ -180,22 +180,21 @@ class DashboardScreen extends ConsumerWidget {
             ),
             ElevatedButton(
               onPressed: () async {
-                try {
-                  final newProject = Project(
-                    id: 'proj_${DateTime.now().millisecondsSinceEpoch}',
-                    orgId: orgId,
-                    name: titleController.text,
-                    description: descController.text,
-                    taskCount: 0,
-                    status: 'active',
-                    createdAt: DateTime.now(),
-                  );
-                  await ref.read(projectRepositoryProvider).createProject(newProject);
-                  ref.invalidate(projectsProvider);
-                  if (context.mounted) Navigator.pop(context);
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                final newProject = Project(
+                  id: 'proj_${DateTime.now().millisecondsSinceEpoch}',
+                  orgId: orgId,
+                  name: titleController.text,
+                  description: descController.text,
+                  taskCount: 0,
+                  status: 'active',
+                  createdAt: DateTime.now(),
+                );
+                await ref.read(projectsProvider.notifier).createProject(newProject);
+                if (context.mounted) {
+                  final error = ref.read(projectsProvider).error;
+                  if (error != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.toString())));
+                  } else {
                     Navigator.pop(context);
                   }
                 }
@@ -237,17 +236,16 @@ class DashboardScreen extends ConsumerWidget {
             ),
             ElevatedButton(
               onPressed: () async {
-                try {
-                  final updatedProject = project.copyWith(
-                    name: titleController.text,
-                    description: descController.text,
-                  );
-                  await ref.read(projectRepositoryProvider).updateProject(updatedProject);
-                  ref.invalidate(projectsProvider);
-                  if (context.mounted) Navigator.pop(context);
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                final updatedProject = project.copyWith(
+                  name: titleController.text,
+                  description: descController.text,
+                );
+                await ref.read(projectsProvider.notifier).updateProject(updatedProject);
+                if (context.mounted) {
+                  final error = ref.read(projectsProvider).error;
+                  if (error != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.toString())));
+                  } else {
                     Navigator.pop(context);
                   }
                 }
@@ -275,13 +273,12 @@ class DashboardScreen extends ConsumerWidget {
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
               onPressed: () async {
-                try {
-                  await ref.read(projectRepositoryProvider).deleteProject(projectId);
-                  ref.invalidate(projectsProvider);
-                  if (context.mounted) Navigator.pop(context);
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                await ref.read(projectsProvider.notifier).deleteProject(projectId);
+                if (context.mounted) {
+                  final error = ref.read(projectsProvider).error;
+                  if (error != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.toString())));
+                  } else {
                     Navigator.pop(context);
                   }
                 }
