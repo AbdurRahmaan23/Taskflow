@@ -9,12 +9,8 @@ import '../presentation/screens/dashboard_screen.dart';
 import '../presentation/screens/project_details_screen.dart';
 import '../presentation/screens/task_details_screen.dart';
 
-// Dummy screen for Splash
-class SplashScreen extends StatelessWidget {
-  const SplashScreen({super.key});
-  @override
-  Widget build(BuildContext context) => const Scaffold(body: Center(child: CircularProgressIndicator()));
-}
+import '../presentation/screens/splash_screen.dart';
+import '../presentation/screens/register_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
@@ -23,11 +19,13 @@ final routerProvider = Provider<GoRouter>((ref) {
     initialLocation: '/',
     redirect: (context, state) {
       final isLoggingIn = state.matchedLocation == '/login';
+      final isRegistering = state.matchedLocation == '/register';
       
       return authState.when(
         data: (user) {
-          if (user == null && !isLoggingIn) return '/login';
-          if (user != null && isLoggingIn) return '/dashboard';
+          if (user == null && !isLoggingIn && !isRegistering) return '/login';
+          if (user != null && (isLoggingIn || isRegistering)) return '/dashboard';
+          if (user != null && state.matchedLocation == '/') return '/dashboard';
           return null;
         },
         loading: () => null,
@@ -42,6 +40,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/register',
+        builder: (context, state) => const RegisterScreen(),
       ),
       GoRoute(
         path: '/dashboard',

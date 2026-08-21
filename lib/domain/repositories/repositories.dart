@@ -7,6 +7,8 @@ abstract class AuthRepository {
   Future<String?> getAccessToken();
   Future<void> saveTokens(MockLoginResponse response);
   Future<AuthCredentials> getCurrentUser();
+  Future<MockLoginResponse> refreshToken();
+  Future<bool> authenticateWithBiometrics();
 }
 
 abstract class ProjectRepository {

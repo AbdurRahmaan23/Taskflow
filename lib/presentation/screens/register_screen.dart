@@ -1,33 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../providers/providers.dart';
 
-class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+  String _name = '';
   String _email = '';
   String _password = '';
 
   void _submit() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      ref.read(authStateProvider.notifier).login(_email, _password);
+      // Simulate success without persisting
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Registration successful! Please login.')),
+      );
+      context.go('/login');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authStateProvider);
-
     return Scaffold(
-      appBar: AppBar(title: const Text('TaskFlow Login')),
+      appBar: AppBar(title: const Text('Register')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -35,6 +36,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              TextFormField(
+                decoration: const InputDecoration(labelText: 'Name', border: OutlineInputBorder()),
+                validator: (value) => (value == null || value.isEmpty) ? 'Please enter name' : null,
+                onSaved: (value) => _name = value!,
+              ),
+              const SizedBox(height: 16),
               TextFormField(
                 decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
                 keyboardType: TextInputType.emailAddress,
@@ -48,28 +55,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 validator: (value) => (value == null || value.isEmpty) ? 'Please enter password' : null,
                 onSaved: (value) => _password = value!,
               ),
-              const SizedBox(height: 24),
-              authState.when(
-                data: (_) => ElevatedButton(
-                  onPressed: _submit,
-                  child: const Text('Login'),
-                ),
-                loading: () => const CircularProgressIndicator(),
-                error: (err, _) => Column(
-                  children: [
-                    ElevatedButton(
-                      onPressed: _submit,
-                      child: const Text('Login'),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(err.toString(), style: const TextStyle(color: Colors.red)),
-                  ],
-                ),
-              ),
               const SizedBox(height: 16),
+              TextFormField(
+                decoration: const InputDecoration(labelText: 'Confirm Password', border: OutlineInputBorder()),
+                obscureText: true,
+                validator: (value) => (value == null || value.isEmpty) ? 'Please confirm password' : null,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: _submit,
+                child: const Text('Register'),
+              ),
               TextButton(
-                onPressed: () => context.go('/register'),
-                child: const Text('Don\'t have an account? Register'),
+                onPressed: () => context.go('/login'),
+                child: const Text('Already have an account? Login'),
               ),
             ],
           ),

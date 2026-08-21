@@ -52,8 +52,15 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthCredentials?>> {
     try {
       final isLoggedIn = await _authRepository.isLoggedIn();
       if (isLoggedIn) {
-        final user = await _authRepository.getCurrentUser();
-        state = AsyncValue.data(user);
+        final authenticated = await _authRepository.authenticateWithBiometrics();
+        if (authenticated) {
+          final user = await _authRepository.getCurrentUser();
+          state = AsyncValue.data(user);
+        } else {
+          // If biometric fails or is cancelled, log out
+          await _authRepository.logout();
+          state = const AsyncValue.data(null);
+        }
       } else {
         state = const AsyncValue.data(null);
       }

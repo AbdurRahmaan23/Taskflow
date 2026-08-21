@@ -135,6 +135,16 @@ class MockDataSource {
     }
     throw Exception('Invalid email or password');
   }
+
+  Future<MockLoginResponse> refreshToken(String refreshToken) async {
+    await init();
+    await _simulateDelay();
+    
+    // Simulate finding a matching refresh token
+    // In mock data, there's only one token response, so we'll just return it.
+    // In a real scenario, this would validate the token first.
+    return MockLoginResponse.fromJson(_data!['auth_mock']['mock_login_response']);
+  }
   
   Future<AuthCredentials> getUserCredentials(String email) async {
     await init();

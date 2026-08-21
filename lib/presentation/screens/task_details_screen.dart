@@ -188,6 +188,7 @@ class _TaskDetailsScreenState extends ConsumerState<TaskDetailsScreen> {
             )
           ],
         ),
+      ),
     );
   }
 }
