@@ -25,7 +25,11 @@ final projectRepositoryProvider = Provider<ProjectRepository>((ref) {
 });
 
 final taskRepositoryProvider = Provider<TaskRepository>((ref) {
-  return TaskRepositoryImpl(ref.watch(mockDataSourceProvider));
+  return TaskRepositoryImpl(
+    ref.watch(mockDataSourceProvider),
+    ref.watch(userRepositoryProvider),
+    ref.watch(projectRepositoryProvider),
+  );
 });
 
 final userRepositoryProvider = Provider<UserRepository>((ref) {
@@ -106,7 +110,7 @@ final projectsProvider = FutureProvider<List<Project>>((ref) async {
 });
 
 // State Management: Org Members
-final orgMembersProvider = FutureProvider<List<OrgMember>>((ref) async {
+final orgMembersProvider = FutureProvider<List<User>>((ref) async {
   final authState = ref.watch(authStateProvider);
   return authState.when(
     data: (user) async {

@@ -150,8 +150,10 @@ class ProjectRepositoryImpl implements ProjectRepository {
 
 class TaskRepositoryImpl implements TaskRepository {
   final MockDataSource dataSource;
+  final UserRepository userRepository;
+  final ProjectRepository projectRepository;
 
-  TaskRepositoryImpl(this.dataSource);
+  TaskRepositoryImpl(this.dataSource, this.userRepository, this.projectRepository);
 
   @override
   Future<List<Task>> getTasks(String projectId) => dataSource.getTasks(projectId);
@@ -165,7 +167,25 @@ class TaskRepositoryImpl implements TaskRepository {
   Future<Task> createTask(Task task) => dataSource.createTask(task);
 
   @override
-  Future<Task> updateTask(Task task) => dataSource.updateTask(task);
+  Future<Task> updateTask(Task task) async {
+    // If assignee is changing or set, validate they belong to the org
+    if (task.assigneeId != null) {
+      final projects = await projectRepository.getProjects(''); // Get all to find
+      // Actually MockDataSource.getProjects filters by orgId. 
+      // It's better to fetch the project from dataSource directly.
+      final allProjectsRaw = await dataSource.getRawProjects();
+      final project = allProjectsRaw.firstWhere((p) => p.id == task.projectId, 
+        orElse: () => throw Exception('Project not found'));
+
+      final orgMembers = await userRepository.getOrgMembers(project.orgId);
+      final isMember = orgMembers.any((u) => u.id == task.assigneeId || u.email == task.assigneeId);
+      
+      if (!isMember) {
+        throw Exception('User does not belong to this organization');
+      }
+    }
+    return dataSource.updateTask(task);
+  }
 
   @override
   Future<void> deleteTask(String taskId) {
@@ -207,5 +227,22 @@ class UserRepositoryImpl implements UserRepository {
   Future<List<User>> getUsers() => dataSource.getUsers();
 
   @override
-  Future<List<OrgMember>> getOrgMembers(String orgId) => dataSource.getOrgMembers(orgId);
+  Future<List<User>> getOrgMembers(String orgId) async {
+    final members = await dataSource.getOrgMembers(orgId);
+    final users = await dataSource.getUsers();
+    
+    // Join: Find users whose id or email matches member.userId
+    // We map member.userId to user.id or user.email
+    final List<User> orgUsers = [];
+    for (var member in members) {
+      try {
+        final user = users.firstWhere((u) => u.id == member.userId || u.email == member.userId);
+        orgUsers.add(user);
+      } catch (e) {
+        // If not found in users.json, skip or add a dummy
+        orgUsers.add(User(id: member.userId, name: member.userId, email: member.userId, avatarUrl: ''));
+      }
+    }
+    return orgUsers;
+  }
 }

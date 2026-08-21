@@ -53,6 +53,13 @@ class MockDataSource {
         .toList();
   }
 
+  Future<List<Project>> getRawProjects() async {
+    await init();
+    await _simulateDelay();
+    final List projects = _data!['projects'] ?? [];
+    return projects.map((e) => Project.fromJson(e)).toList();
+  }
+
   Future<Project> createProject(Project project) async {
     await init();
     await _simulateDelay();

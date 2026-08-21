@@ -36,5 +36,5 @@ abstract class NotificationRepository {
 
 abstract class UserRepository {
   Future<List<User>> getUsers();
-  Future<List<OrgMember>> getOrgMembers(String orgId);
+  Future<List<User>> getOrgMembers(String orgId);
 }

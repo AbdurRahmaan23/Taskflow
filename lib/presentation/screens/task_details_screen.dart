@@ -13,7 +13,7 @@ class TaskDetailsScreen extends ConsumerStatefulWidget {
 
 class _TaskDetailsScreenState extends ConsumerState<TaskDetailsScreen> {
   Task? task;
-  List<OrgMember>? orgMembers;
+  List<User>? orgMembers;
   bool isLoading = true;
   final _commentController = TextEditingController();
 
@@ -72,11 +72,18 @@ class _TaskDetailsScreenState extends ConsumerState<TaskDetailsScreen> {
   Future<void> _updateAssignee(String? newAssigneeId) async {
     if (task == null) return;
     setState(() => isLoading = true);
-    final updated = task!.copyWith(assigneeId: newAssigneeId);
-    await ref.read(taskRepositoryProvider).updateTask(updated);
-    ref.invalidate(tasksProvider(updated.projectId)); // refresh lists
-    task = updated;
-    setState(() => isLoading = false);
+    try {
+      final updated = task!.copyWith(assigneeId: newAssigneeId);
+      await ref.read(taskRepositoryProvider).updateTask(updated);
+      ref.invalidate(tasksProvider(updated.projectId)); // refresh lists
+      task = updated;
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+    } finally {
+      setState(() => isLoading = false);
+    }
   }
 
   @override
@@ -134,7 +141,7 @@ class _TaskDetailsScreenState extends ConsumerState<TaskDetailsScreen> {
               hint: const Text('Unassigned'),
               items: [
                 const DropdownMenuItem<String?>(value: null, child: Text('Unassigned')),
-                ...orgMembers?.map((m) => DropdownMenuItem<String?>(value: m.userId, child: Text(m.userId))) ?? []
+                ...orgMembers?.map((m) => DropdownMenuItem<String?>(value: m.id, child: Text(m.name))) ?? []
               ],
               onChanged: _updateAssignee,
             ),

@@ -21,6 +21,8 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final tasksAsync = ref.watch(tasksProvider(widget.projectId));
+    final membersAsync = ref.watch(orgMembersProvider);
+    final members = membersAsync.value ?? [];
 
     return Scaffold(
       appBar: AppBar(
@@ -28,7 +30,7 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
       ),
       body: Column(
         children: [
-          _buildFilterRow(),
+          _buildFilterRow(members),
           Expanded(
             child: tasksAsync.when(
               data: (tasks) {
@@ -82,10 +84,10 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
                           ],
                         ),
                       ),
-                      _buildTaskSection('To Do', todoTasks, context),
-                      _buildTaskSection('In Progress', inProgressTasks, context),
-                      _buildTaskSection('Review', reviewTasks, context),
-                      _buildTaskSection('Done', doneTasks, context),
+                      _buildTaskSection('To Do', todoTasks, members, context),
+                      _buildTaskSection('In Progress', inProgressTasks, members, context),
+                      _buildTaskSection('Review', reviewTasks, members, context),
+                      _buildTaskSection('Done', doneTasks, members, context),
                     ],
                   ),
                 );
@@ -103,10 +105,7 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
     );
   }
 
-  Widget _buildFilterRow() {
-    final membersAsync = ref.watch(orgMembersProvider);
-    final members = membersAsync.value ?? [];
-
+  Widget _buildFilterRow(List<User> members) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Column(
@@ -153,7 +152,7 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
                   value: _filterAssignee,
                   items: [
                     const DropdownMenuItem(value: null, child: Text('All')),
-                    ...members.map((m) => DropdownMenuItem(value: m.userId, child: Text(m.userId)))
+                    ...members.map((m) => DropdownMenuItem(value: m.id, child: Text(m.name)))
                   ],
                   onChanged: (val) => setState(() => _filterAssignee = val),
                 ),
@@ -271,7 +270,7 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
     );
   }
 
-  Widget _buildTaskSection(String title, List<Task> tasks, BuildContext context) {
+  Widget _buildTaskSection(String title, List<Task> tasks, List<User> members, BuildContext context) {
     if (tasks.isEmpty) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -280,20 +279,23 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
           padding: const EdgeInsets.all(8.0),
           child: Text(title, style: Theme.of(context).textTheme.titleLarge),
         ),
-        ...tasks.map((task) => ListTile(
-          title: Text(task.title),
-          subtitle: Text('Priority: ${task.priority} | Assignee: ${task.assigneeId ?? 'Unassigned'}${task.dueDate != null ? ' | Due: ${task.dueDate}' : ''}'),
-          trailing: IconButton(
-            icon: const Icon(Icons.delete, color: Colors.red),
-            onPressed: () async {
-              await ref.read(taskRepositoryProvider).deleteTask(task.id);
-              ref.invalidate(tasksProvider(widget.projectId));
+        ...tasks.map((task) {
+          final assignee = members.where((m) => m.id == task.assigneeId).firstOrNull?.name ?? task.assigneeId ?? 'Unassigned';
+          return ListTile(
+            title: Text(task.title),
+            subtitle: Text('Priority: ${task.priority} | Assignee: $assignee${task.dueDate != null ? ' | Due: ${task.dueDate!.split('T')[0]}' : ''}'),
+            trailing: IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red),
+              onPressed: () async {
+                await ref.read(taskRepositoryProvider).deleteTask(task.id);
+                ref.invalidate(tasksProvider(widget.projectId));
+              },
+            ),
+            onTap: () {
+              context.push('/task/${task.id}');
             },
-          ),
-          onTap: () {
-            context.push('/task/${task.id}');
-          },
-        )),
+          );
+        }),
       ],
     );
   }
