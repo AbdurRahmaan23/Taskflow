@@ -15,6 +15,8 @@ class ProjectDetailsScreen extends ConsumerStatefulWidget {
 class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
   String? _filterStatus;
   String? _filterPriority;
+  String? _filterAssignee;
+  DateTime? _filterDueDate;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +39,19 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
                 }
                 if (_filterPriority != null && _filterPriority!.isNotEmpty) {
                   filtered = filtered.where((t) => t.priority == _filterPriority).toList();
+                }
+                if (_filterAssignee != null && _filterAssignee!.isNotEmpty) {
+                  filtered = filtered.where((t) => t.assigneeId == _filterAssignee).toList();
+                }
+                if (_filterDueDate != null) {
+                  filtered = filtered.where((t) {
+                    if (t.dueDate == null) return false;
+                    final due = DateTime.tryParse(t.dueDate!);
+                    if (due == null) return false;
+                    return due.year == _filterDueDate!.year &&
+                           due.month == _filterDueDate!.month &&
+                           due.day == _filterDueDate!.day;
+                  }).toList();
                 }
 
                 if (filtered.isEmpty) {
@@ -89,38 +104,90 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
   }
 
   Widget _buildFilterRow() {
+    final membersAsync = ref.watch(orgMembersProvider);
+    final members = membersAsync.value ?? [];
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Row(
+      child: Column(
         children: [
-          Expanded(
-            child: DropdownButtonFormField<String?>(
-              decoration: const InputDecoration(labelText: 'Status', isDense: true),
-              value: _filterStatus,
-              items: const [
-                DropdownMenuItem(value: null, child: Text('All')),
-                DropdownMenuItem(value: 'todo', child: Text('To Do')),
-                DropdownMenuItem(value: 'in_progress', child: Text('In Progress')),
-                DropdownMenuItem(value: 'review', child: Text('Review')),
-                DropdownMenuItem(value: 'done', child: Text('Done')),
-              ],
-              onChanged: (val) => setState(() => _filterStatus = val),
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<String?>(
+                  decoration: const InputDecoration(labelText: 'Status', isDense: true),
+                  value: _filterStatus,
+                  items: const [
+                    DropdownMenuItem(value: null, child: Text('All')),
+                    DropdownMenuItem(value: 'todo', child: Text('To Do')),
+                    DropdownMenuItem(value: 'in_progress', child: Text('In Progress')),
+                    DropdownMenuItem(value: 'review', child: Text('Review')),
+                    DropdownMenuItem(value: 'done', child: Text('Done')),
+                  ],
+                  onChanged: (val) => setState(() => _filterStatus = val),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: DropdownButtonFormField<String?>(
+                  decoration: const InputDecoration(labelText: 'Priority', isDense: true),
+                  value: _filterPriority,
+                  items: const [
+                    DropdownMenuItem(value: null, child: Text('All')),
+                    DropdownMenuItem(value: 'low', child: Text('Low')),
+                    DropdownMenuItem(value: 'medium', child: Text('Medium')),
+                    DropdownMenuItem(value: 'high', child: Text('High')),
+                    DropdownMenuItem(value: 'urgent', child: Text('Urgent')),
+                  ],
+                  onChanged: (val) => setState(() => _filterPriority = val),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: DropdownButtonFormField<String?>(
-              decoration: const InputDecoration(labelText: 'Priority', isDense: true),
-              value: _filterPriority,
-              items: const [
-                DropdownMenuItem(value: null, child: Text('All')),
-                DropdownMenuItem(value: 'low', child: Text('Low')),
-                DropdownMenuItem(value: 'medium', child: Text('Medium')),
-                DropdownMenuItem(value: 'high', child: Text('High')),
-                DropdownMenuItem(value: 'urgent', child: Text('Urgent')),
-              ],
-              onChanged: (val) => setState(() => _filterPriority = val),
-            ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<String?>(
+                  decoration: const InputDecoration(labelText: 'Assignee', isDense: true),
+                  value: _filterAssignee,
+                  items: [
+                    const DropdownMenuItem(value: null, child: Text('All')),
+                    ...members.map((m) => DropdownMenuItem(value: m.userId, child: Text(m.userId)))
+                  ],
+                  onChanged: (val) => setState(() => _filterAssignee = val),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: InkWell(
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: _filterDueDate ?? DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2100),
+                    );
+                    if (picked != null) {
+                      setState(() => _filterDueDate = picked);
+                    }
+                  },
+                  child: InputDecorator(
+                    decoration: InputDecoration(
+                      labelText: 'Due Date',
+                      isDense: true,
+                      suffixIcon: _filterDueDate != null
+                          ? IconButton(
+                              icon: const Icon(Icons.clear, size: 16),
+                              onPressed: () => setState(() => _filterDueDate = null),
+                            )
+                          : null,
+                    ),
+                    child: Text(_filterDueDate != null ? _filterDueDate!.toString().split(' ')[0] : 'All'),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -131,6 +198,7 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
     final titleController = TextEditingController();
     final descController = TextEditingController();
     String selectedPriority = 'medium';
+    DateTime? selectedDueDate;
 
     showDialog(
       context: context,
@@ -139,19 +207,41 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
           builder: (context, setState) {
             return AlertDialog(
               title: const Text('New Task'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(controller: titleController, decoration: const InputDecoration(labelText: 'Title')),
-                  TextField(controller: descController, decoration: const InputDecoration(labelText: 'Description')),
-                  const SizedBox(height: 16),
-                  DropdownButtonFormField<String>(
-                    value: selectedPriority,
-                    decoration: const InputDecoration(labelText: 'Priority'),
-                    items: ['low', 'medium', 'high', 'urgent'].map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
-                    onChanged: (val) => setState(() => selectedPriority = val!),
-                  ),
-                ],
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(controller: titleController, decoration: const InputDecoration(labelText: 'Title')),
+                    TextField(controller: descController, decoration: const InputDecoration(labelText: 'Description')),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      value: selectedPriority,
+                      decoration: const InputDecoration(labelText: 'Priority'),
+                      items: ['low', 'medium', 'high', 'urgent'].map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
+                      onChanged: (val) => setState(() => selectedPriority = val!),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(child: Text(selectedDueDate == null ? 'No due date' : 'Due: ${selectedDueDate.toString().split(' ')[0]}')),
+                        TextButton(
+                          onPressed: () async {
+                            final picked = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime.now(),
+                              lastDate: DateTime(2100),
+                            );
+                            if (picked != null) {
+                              setState(() => selectedDueDate = picked);
+                            }
+                          },
+                          child: const Text('Select Date'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
               actions: [
                 TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
@@ -164,6 +254,7 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
                       description: descController.text,
                       status: 'todo',
                       priority: selectedPriority,
+                      dueDate: selectedDueDate?.toIso8601String(),
                       createdAt: DateTime.now(),
                     );
                     await ref.read(taskRepositoryProvider).createTask(newTask);
@@ -191,7 +282,7 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
         ),
         ...tasks.map((task) => ListTile(
           title: Text(task.title),
-          subtitle: Text('Priority: ${task.priority} | Assignee: ${task.assigneeId ?? 'Unassigned'}'),
+          subtitle: Text('Priority: ${task.priority} | Assignee: ${task.assigneeId ?? 'Unassigned'}${task.dueDate != null ? ' | Due: ${task.dueDate}' : ''}'),
           trailing: IconButton(
             icon: const Icon(Icons.delete, color: Colors.red),
             onPressed: () async {

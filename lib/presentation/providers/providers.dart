@@ -105,6 +105,20 @@ final projectsProvider = FutureProvider<List<Project>>((ref) async {
   );
 });
 
+// State Management: Org Members
+final orgMembersProvider = FutureProvider<List<OrgMember>>((ref) async {
+  final authState = ref.watch(authStateProvider);
+  return authState.when(
+    data: (user) async {
+      if (user == null) return [];
+      final repo = ref.watch(userRepositoryProvider);
+      return repo.getOrgMembers(user.orgId);
+    },
+    loading: () => [],
+    error: (_, __) => [],
+  );
+});
+
 // State Management: Tasks for a project
 final tasksProvider = FutureProvider.family<List<Task>, String>((ref, projectId) async {
   final repo = ref.watch(taskRepositoryProvider);

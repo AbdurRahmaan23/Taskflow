@@ -93,7 +93,15 @@ class _TaskDetailsScreenState extends ConsumerState<TaskDetailsScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Task Details')),
+      appBar: AppBar(
+        title: const Text('Task Details'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () => _showEditTaskDialog(context),
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -189,6 +197,84 @@ class _TaskDetailsScreenState extends ConsumerState<TaskDetailsScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showEditTaskDialog(BuildContext context) {
+    if (task == null) return;
+    
+    final titleController = TextEditingController(text: task!.title);
+    final descController = TextEditingController(text: task!.description);
+    String selectedPriority = task!.priority;
+    DateTime? selectedDueDate = task!.dueDate != null ? DateTime.tryParse(task!.dueDate!) : null;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Edit Task'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(controller: titleController, decoration: const InputDecoration(labelText: 'Title')),
+                    TextField(controller: descController, decoration: const InputDecoration(labelText: 'Description')),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      value: selectedPriority,
+                      decoration: const InputDecoration(labelText: 'Priority'),
+                      items: ['low', 'medium', 'high', 'urgent'].map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
+                      onChanged: (val) => setState(() => selectedPriority = val!),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(child: Text(selectedDueDate == null ? 'No due date' : 'Due: ${selectedDueDate.toString().split(' ')[0]}')),
+                        TextButton(
+                          onPressed: () async {
+                            final picked = await showDatePicker(
+                              context: context,
+                              initialDate: selectedDueDate ?? DateTime.now(),
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2100),
+                            );
+                            if (picked != null) {
+                              setState(() => selectedDueDate = picked);
+                            }
+                          },
+                          child: const Text('Select Date'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+                ElevatedButton(
+                  onPressed: () async {
+                    this.setState(() => isLoading = true);
+                    final updated = task!.copyWith(
+                      title: titleController.text,
+                      description: descController.text,
+                      priority: selectedPriority,
+                      dueDate: selectedDueDate?.toIso8601String(),
+                    );
+                    await ref.read(taskRepositoryProvider).updateTask(updated);
+                    ref.invalidate(tasksProvider(updated.projectId));
+                    task = updated;
+                    this.setState(() => isLoading = false);
+                    if (context.mounted) Navigator.pop(context);
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }
