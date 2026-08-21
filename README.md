@@ -19,7 +19,8 @@ We use **Riverpod** (`flutter_riverpod`) for robust state management and depende
 The app does not make actual network requests. Instead, it reads from `assets/mock_data/mock-data.json`.
 - `MockDataSource` parses the JSON exactly once upon startup.
 - It simulates an artificial network delay of 500ms for all "requests".
-- **Error/Offline Simulation**: You can toggle `simulateOffline` or `simulateError` booleans directly in `MockDataSource` to force network errors or timeout states for testing the UI.
+- **Error/Offline Simulation**: You can open the **Debug Drawer** from the Dashboard screen to toggle `Simulate Offline Mode` or `Simulate API Error`. This forces network errors or timeout states globally for testing the UI's error states.
+- **Request Cancellation (Bonus)**: A simple CancelToken mechanism is implemented in the `MockDataSource` to demonstrate request cancellation.
 
 ## Setup & Running
 **Prerequisites:**

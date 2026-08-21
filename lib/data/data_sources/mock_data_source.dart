@@ -2,6 +2,11 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import '../../domain/models/models.dart';
 
+class CancelToken {
+  bool isCancelled = false;
+  void cancel() => isCancelled = true;
+}
+
 class MockDataSource {
   Map<String, dynamic>? _data;
   bool simulateNetworkDelay = true;
@@ -18,13 +23,21 @@ class MockDataSource {
     }
   }
 
-  Future<void> _simulateDelay() async {
+  Future<void> _simulateDelay([CancelToken? cancelToken]) async {
+    if (cancelToken?.isCancelled ?? false) throw Exception('Request Cancelled');
+    
     if (simulateOffline) {
       throw Exception('Simulated offline mode: Network is unreachable.');
     }
     if (simulateNetworkDelay) {
-      await Future.delayed(const Duration(milliseconds: 500));
+      // Small loop to allow cancellation during delay
+      for (int i = 0; i < 5; i++) {
+        if (cancelToken?.isCancelled ?? false) throw Exception('Request Cancelled');
+        await Future.delayed(const Duration(milliseconds: 100));
+      }
     }
+    
+    if (cancelToken?.isCancelled ?? false) throw Exception('Request Cancelled');
     if (simulateError) {
       throw Exception('Simulated API Error.');
     }
