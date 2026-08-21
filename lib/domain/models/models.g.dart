@@ -145,9 +145,10 @@ _AppNotification _$AppNotificationFromJson(Map<String, dynamic> json) =>
     _AppNotification(
       id: json['id'] as String,
       userId: json['user_id'] as String,
-      title: json['title'] as String,
+      taskId: json['task_id'] as String,
+      type: json['type'] as String,
       message: json['message'] as String,
-      isRead: json['is_read'] as bool,
+      isRead: json['read'] as bool,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
 
@@ -155,8 +156,9 @@ Map<String, dynamic> _$AppNotificationToJson(_AppNotification instance) =>
     <String, dynamic>{
       'id': instance.id,
       'user_id': instance.userId,
-      'title': instance.title,
+      'task_id': instance.taskId,
+      'type': instance.type,
       'message': instance.message,
-      'is_read': instance.isRead,
+      'read': instance.isRead,
       'created_at': instance.createdAt.toIso8601String(),
     };

@@ -293,8 +293,9 @@ class DashboardScreen extends ConsumerWidget {
                       itemCount: notifs.length,
                       itemBuilder: (context, index) {
                         final notif = notifs[index];
+                        final title = notif.type == 'task_assigned' ? 'Task Assigned' : notif.type;
                         return ListTile(
-                          title: Text(notif.title, style: TextStyle(fontWeight: notif.isRead ? FontWeight.normal : FontWeight.bold)),
+                          title: Text(title, style: TextStyle(fontWeight: notif.isRead ? FontWeight.normal : FontWeight.bold)),
                           subtitle: Text(notif.message),
                           trailing: notif.isRead ? null : IconButton(
                             icon: const Icon(Icons.check),
@@ -303,6 +304,10 @@ class DashboardScreen extends ConsumerWidget {
                               ref.invalidate(notificationsProvider(userId));
                             },
                           ),
+                          onTap: () {
+                            Navigator.pop(context);
+                            context.push('/task/${notif.taskId}');
+                          },
                         );
                       },
                     );
