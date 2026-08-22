@@ -13,12 +13,15 @@ class TaskDetailsScreen extends ConsumerStatefulWidget {
 
 class _TaskDetailsScreenState extends ConsumerState<TaskDetailsScreen> {
   final _commentController = TextEditingController();
+  bool _isUpdating = false;
 
   Future<void> _updateStatus(Task task, String newStatus) async {
+    setState(() => _isUpdating = true);
     final updated = task.copyWith(status: newStatus);
     await ref.read(tasksProvider(task.projectId).notifier).updateTask(updated);
     ref.invalidate(taskProvider(task.id));
     if (mounted) {
+      setState(() => _isUpdating = false);
       final error = ref.read(tasksProvider(task.projectId)).error;
       if (error != null) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.toString())));
@@ -27,10 +30,12 @@ class _TaskDetailsScreenState extends ConsumerState<TaskDetailsScreen> {
   }
 
   Future<void> _updateAssignee(Task task, String? newAssigneeId) async {
+    setState(() => _isUpdating = true);
     final updated = task.copyWith(assigneeId: newAssigneeId);
     await ref.read(tasksProvider(task.projectId).notifier).updateTask(updated);
     ref.invalidate(taskProvider(task.id));
     if (mounted) {
+      setState(() => _isUpdating = false);
       final error = ref.read(tasksProvider(task.projectId)).error;
       if (error != null) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.toString())));
@@ -76,7 +81,7 @@ class _TaskDetailsScreenState extends ConsumerState<TaskDetailsScreen> {
                     items: ['todo', 'in_progress', 'review', 'done']
                         .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                         .toList(),
-                    onChanged: (val) {
+                    onChanged: _isUpdating ? null : (val) {
                       if (val != null) _updateStatus(task, val);
                     },
                   ),
@@ -92,7 +97,7 @@ class _TaskDetailsScreenState extends ConsumerState<TaskDetailsScreen> {
                   const DropdownMenuItem<String?>(value: null, child: Text('Unassigned')),
                   ...orgMembers.map((m) => DropdownMenuItem<String?>(value: m.id, child: Text(m.name)))
                 ],
-                onChanged: (val) => _updateAssignee(task, val),
+                onChanged: _isUpdating ? null : (val) => _updateAssignee(task, val),
               ),
               const SizedBox(height: 16),
               const Divider(),
@@ -217,16 +222,16 @@ class _TaskDetailsScreenState extends ConsumerState<TaskDetailsScreen> {
                       priority: selectedPriority,
                       dueDate: selectedDueDate?.toIso8601String(),
                     );
-                    await ref.read(tasksProvider(task.projectId).notifier).updateTask(updated);
-                    ref.invalidate(taskProvider(task.id));
-                    if (context.mounted) {
-                      final error = ref.read(tasksProvider(task.projectId)).error;
-                      if (error != null) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.toString())));
-                      } else {
-                        Navigator.pop(context);
+                    Navigator.pop(context);
+                    ref.read(tasksProvider(task.projectId).notifier).updateTask(updated).then((_) {
+                      ref.invalidate(taskProvider(task.id));
+                      if (context.mounted) {
+                        final error = ref.read(tasksProvider(task.projectId)).error;
+                        if (error != null) {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.toString())));
+                        }
                       }
-                    }
+                    });
                   },
                   child: const Text('Save'),
                 ),

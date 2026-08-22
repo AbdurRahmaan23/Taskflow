@@ -98,8 +98,8 @@ abstract class Comment with _$Comment {
   const factory Comment({
     required String id,
     @JsonKey(name: 'task_id') required String taskId,
-    @JsonKey(name: 'user_id') required String userId,
-    required String content,
+    @JsonKey(name: 'author_id') required String userId,
+    @JsonKey(name: 'body') required String content,
     @JsonKey(name: 'created_at') required DateTime createdAt,
   }) = _Comment;
 
