@@ -21,7 +21,7 @@ class DashboardScreen extends ConsumerWidget {
             onPressed: () {
               final user = ref.read(authStateProvider).value;
               if (user != null) {
-                _showNotificationsDialog(context, ref, user.email);
+                _showNotificationsDialog(context, ref, user.id);
               }
             },
           ),
