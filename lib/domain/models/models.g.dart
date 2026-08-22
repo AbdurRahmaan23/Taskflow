@@ -93,6 +93,7 @@ Map<String, dynamic> _$TaskToJson(_Task instance) => <String, dynamic>{
 
 _AuthCredentials _$AuthCredentialsFromJson(Map<String, dynamic> json) =>
     _AuthCredentials(
+      id: json['id'] as String,
       email: json['email'] as String,
       password: json['password'] as String,
       orgId: json['org_id'] as String,
@@ -101,6 +102,7 @@ _AuthCredentials _$AuthCredentialsFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$AuthCredentialsToJson(_AuthCredentials instance) =>
     <String, dynamic>{
+      'id': instance.id,
       'email': instance.email,
       'password': instance.password,
       'org_id': instance.orgId,
@@ -128,16 +130,16 @@ Map<String, dynamic> _$MockLoginResponseToJson(_MockLoginResponse instance) =>
 _Comment _$CommentFromJson(Map<String, dynamic> json) => _Comment(
   id: json['id'] as String,
   taskId: json['task_id'] as String,
-  userId: json['user_id'] as String,
-  content: json['content'] as String,
+  userId: json['author_id'] as String,
+  content: json['body'] as String,
   createdAt: DateTime.parse(json['created_at'] as String),
 );
 
 Map<String, dynamic> _$CommentToJson(_Comment instance) => <String, dynamic>{
   'id': instance.id,
   'task_id': instance.taskId,
-  'user_id': instance.userId,
-  'content': instance.content,
+  'author_id': instance.userId,
+  'body': instance.content,
   'created_at': instance.createdAt.toIso8601String(),
 };
 

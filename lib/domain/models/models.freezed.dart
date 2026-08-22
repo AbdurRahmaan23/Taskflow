@@ -1393,7 +1393,7 @@ as DateTime,
 /// @nodoc
 mixin _$AuthCredentials {
 
- String get email; String get password;@JsonKey(name: 'org_id') String get orgId; String get role;
+ String get id; String get email; String get password;@JsonKey(name: 'org_id') String get orgId; String get role;
 /// Create a copy of AuthCredentials
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1406,16 +1406,16 @@ $AuthCredentialsCopyWith<AuthCredentials> get copyWith => _$AuthCredentialsCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthCredentials&&(identical(other.email, email) || other.email == email)&&(identical(other.password, password) || other.password == password)&&(identical(other.orgId, orgId) || other.orgId == orgId)&&(identical(other.role, role) || other.role == role));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthCredentials&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.password, password) || other.password == password)&&(identical(other.orgId, orgId) || other.orgId == orgId)&&(identical(other.role, role) || other.role == role));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,email,password,orgId,role);
+int get hashCode => Object.hash(runtimeType,id,email,password,orgId,role);
 
 @override
 String toString() {
-  return 'AuthCredentials(email: $email, password: $password, orgId: $orgId, role: $role)';
+  return 'AuthCredentials(id: $id, email: $email, password: $password, orgId: $orgId, role: $role)';
 }
 
 
@@ -1426,7 +1426,7 @@ abstract mixin class $AuthCredentialsCopyWith<$Res>  {
   factory $AuthCredentialsCopyWith(AuthCredentials value, $Res Function(AuthCredentials) _then) = _$AuthCredentialsCopyWithImpl;
 @useResult
 $Res call({
- String email, String password,@JsonKey(name: 'org_id') String orgId, String role
+ String id, String email, String password,@JsonKey(name: 'org_id') String orgId, String role
 });
 
 
@@ -1443,9 +1443,10 @@ class _$AuthCredentialsCopyWithImpl<$Res>
 
 /// Create a copy of AuthCredentials
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? email = null,Object? password = null,Object? orgId = null,Object? role = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? email = null,Object? password = null,Object? orgId = null,Object? role = null,}) {
   return _then(_self.copyWith(
-email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
 as String,orgId: null == orgId ? _self.orgId : orgId // ignore: cast_nullable_to_non_nullable
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
@@ -1534,10 +1535,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String email,  String password, @JsonKey(name: 'org_id')  String orgId,  String role)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String email,  String password, @JsonKey(name: 'org_id')  String orgId,  String role)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AuthCredentials() when $default != null:
-return $default(_that.email,_that.password,_that.orgId,_that.role);case _:
+return $default(_that.id,_that.email,_that.password,_that.orgId,_that.role);case _:
   return orElse();
 
 }
@@ -1555,10 +1556,10 @@ return $default(_that.email,_that.password,_that.orgId,_that.role);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String email,  String password, @JsonKey(name: 'org_id')  String orgId,  String role)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String email,  String password, @JsonKey(name: 'org_id')  String orgId,  String role)  $default,) {final _that = this;
 switch (_that) {
 case _AuthCredentials():
-return $default(_that.email,_that.password,_that.orgId,_that.role);case _:
+return $default(_that.id,_that.email,_that.password,_that.orgId,_that.role);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1575,10 +1576,10 @@ return $default(_that.email,_that.password,_that.orgId,_that.role);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String email,  String password, @JsonKey(name: 'org_id')  String orgId,  String role)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String email,  String password, @JsonKey(name: 'org_id')  String orgId,  String role)?  $default,) {final _that = this;
 switch (_that) {
 case _AuthCredentials() when $default != null:
-return $default(_that.email,_that.password,_that.orgId,_that.role);case _:
+return $default(_that.id,_that.email,_that.password,_that.orgId,_that.role);case _:
   return null;
 
 }
@@ -1590,9 +1591,10 @@ return $default(_that.email,_that.password,_that.orgId,_that.role);case _:
 @JsonSerializable()
 
 class _AuthCredentials implements AuthCredentials {
-  const _AuthCredentials({required this.email, required this.password, @JsonKey(name: 'org_id') required this.orgId, required this.role});
+  const _AuthCredentials({required this.id, required this.email, required this.password, @JsonKey(name: 'org_id') required this.orgId, required this.role});
   factory _AuthCredentials.fromJson(Map<String, dynamic> json) => _$AuthCredentialsFromJson(json);
 
+@override final  String id;
 @override final  String email;
 @override final  String password;
 @override@JsonKey(name: 'org_id') final  String orgId;
@@ -1611,16 +1613,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthCredentials&&(identical(other.email, email) || other.email == email)&&(identical(other.password, password) || other.password == password)&&(identical(other.orgId, orgId) || other.orgId == orgId)&&(identical(other.role, role) || other.role == role));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthCredentials&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.password, password) || other.password == password)&&(identical(other.orgId, orgId) || other.orgId == orgId)&&(identical(other.role, role) || other.role == role));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,email,password,orgId,role);
+int get hashCode => Object.hash(runtimeType,id,email,password,orgId,role);
 
 @override
 String toString() {
-  return 'AuthCredentials(email: $email, password: $password, orgId: $orgId, role: $role)';
+  return 'AuthCredentials(id: $id, email: $email, password: $password, orgId: $orgId, role: $role)';
 }
 
 
@@ -1631,7 +1633,7 @@ abstract mixin class _$AuthCredentialsCopyWith<$Res> implements $AuthCredentials
   factory _$AuthCredentialsCopyWith(_AuthCredentials value, $Res Function(_AuthCredentials) _then) = __$AuthCredentialsCopyWithImpl;
 @override @useResult
 $Res call({
- String email, String password,@JsonKey(name: 'org_id') String orgId, String role
+ String id, String email, String password,@JsonKey(name: 'org_id') String orgId, String role
 });
 
 
@@ -1648,9 +1650,10 @@ class __$AuthCredentialsCopyWithImpl<$Res>
 
 /// Create a copy of AuthCredentials
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? email = null,Object? password = null,Object? orgId = null,Object? role = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? email = null,Object? password = null,Object? orgId = null,Object? role = null,}) {
   return _then(_AuthCredentials(
-email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
 as String,orgId: null == orgId ? _self.orgId : orgId // ignore: cast_nullable_to_non_nullable
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
@@ -1937,7 +1940,7 @@ as int,
 /// @nodoc
 mixin _$Comment {
 
- String get id;@JsonKey(name: 'task_id') String get taskId;@JsonKey(name: 'user_id') String get userId; String get content;@JsonKey(name: 'created_at') DateTime get createdAt;
+ String get id;@JsonKey(name: 'task_id') String get taskId;@JsonKey(name: 'author_id') String get userId;@JsonKey(name: 'body') String get content;@JsonKey(name: 'created_at') DateTime get createdAt;
 /// Create a copy of Comment
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1970,7 +1973,7 @@ abstract mixin class $CommentCopyWith<$Res>  {
   factory $CommentCopyWith(Comment value, $Res Function(Comment) _then) = _$CommentCopyWithImpl;
 @useResult
 $Res call({
- String id,@JsonKey(name: 'task_id') String taskId,@JsonKey(name: 'user_id') String userId, String content,@JsonKey(name: 'created_at') DateTime createdAt
+ String id,@JsonKey(name: 'task_id') String taskId,@JsonKey(name: 'author_id') String userId,@JsonKey(name: 'body') String content,@JsonKey(name: 'created_at') DateTime createdAt
 });
 
 
@@ -2079,7 +2082,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'task_id')  String taskId, @JsonKey(name: 'user_id')  String userId,  String content, @JsonKey(name: 'created_at')  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'task_id')  String taskId, @JsonKey(name: 'author_id')  String userId, @JsonKey(name: 'body')  String content, @JsonKey(name: 'created_at')  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Comment() when $default != null:
 return $default(_that.id,_that.taskId,_that.userId,_that.content,_that.createdAt);case _:
@@ -2100,7 +2103,7 @@ return $default(_that.id,_that.taskId,_that.userId,_that.content,_that.createdAt
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'task_id')  String taskId, @JsonKey(name: 'user_id')  String userId,  String content, @JsonKey(name: 'created_at')  DateTime createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'task_id')  String taskId, @JsonKey(name: 'author_id')  String userId, @JsonKey(name: 'body')  String content, @JsonKey(name: 'created_at')  DateTime createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _Comment():
 return $default(_that.id,_that.taskId,_that.userId,_that.content,_that.createdAt);case _:
@@ -2120,7 +2123,7 @@ return $default(_that.id,_that.taskId,_that.userId,_that.content,_that.createdAt
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'task_id')  String taskId, @JsonKey(name: 'user_id')  String userId,  String content, @JsonKey(name: 'created_at')  DateTime createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'task_id')  String taskId, @JsonKey(name: 'author_id')  String userId, @JsonKey(name: 'body')  String content, @JsonKey(name: 'created_at')  DateTime createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _Comment() when $default != null:
 return $default(_that.id,_that.taskId,_that.userId,_that.content,_that.createdAt);case _:
@@ -2135,13 +2138,13 @@ return $default(_that.id,_that.taskId,_that.userId,_that.content,_that.createdAt
 @JsonSerializable()
 
 class _Comment implements Comment {
-  const _Comment({required this.id, @JsonKey(name: 'task_id') required this.taskId, @JsonKey(name: 'user_id') required this.userId, required this.content, @JsonKey(name: 'created_at') required this.createdAt});
+  const _Comment({required this.id, @JsonKey(name: 'task_id') required this.taskId, @JsonKey(name: 'author_id') required this.userId, @JsonKey(name: 'body') required this.content, @JsonKey(name: 'created_at') required this.createdAt});
   factory _Comment.fromJson(Map<String, dynamic> json) => _$CommentFromJson(json);
 
 @override final  String id;
 @override@JsonKey(name: 'task_id') final  String taskId;
-@override@JsonKey(name: 'user_id') final  String userId;
-@override final  String content;
+@override@JsonKey(name: 'author_id') final  String userId;
+@override@JsonKey(name: 'body') final  String content;
 @override@JsonKey(name: 'created_at') final  DateTime createdAt;
 
 /// Create a copy of Comment
@@ -2177,7 +2180,7 @@ abstract mixin class _$CommentCopyWith<$Res> implements $CommentCopyWith<$Res> {
   factory _$CommentCopyWith(_Comment value, $Res Function(_Comment) _then) = __$CommentCopyWithImpl;
 @override @useResult
 $Res call({
- String id,@JsonKey(name: 'task_id') String taskId,@JsonKey(name: 'user_id') String userId, String content,@JsonKey(name: 'created_at') DateTime createdAt
+ String id,@JsonKey(name: 'task_id') String taskId,@JsonKey(name: 'author_id') String userId,@JsonKey(name: 'body') String content,@JsonKey(name: 'created_at') DateTime createdAt
 });
 
 
