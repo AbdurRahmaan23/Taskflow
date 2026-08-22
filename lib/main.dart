@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/router.dart';
+import 'core/theme.dart';
 import 'presentation/providers/providers.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -66,13 +67,9 @@ class _TaskFlowAppState extends ConsumerState<TaskFlowApp> {
       onPointerUp: (_) => _resetTimer(),
       child: MaterialApp.router(
         title: 'TaskFlow',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
-        ),
-        darkTheme: ThemeData.dark(useMaterial3: true).copyWith(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, brightness: Brightness.dark),
-        ),
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
         themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
         routerConfig: router,
       ),
