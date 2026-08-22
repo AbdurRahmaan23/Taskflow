@@ -92,8 +92,16 @@ For reviewer testing, open the application and authenticate.
 2. **Simulate Offline Mode**: Toggle this ON. Attempt to fetch a new project or task; it will instantly fail and use cached data (or show an offline message). You can create a Task offline, and it will be queued. Toggle back OFF to "sync" it.
 3. **Simulate API Error**: Toggle this ON. Any subsequent fetch or mutation will simulate a random API error (e.g., Timeout or 500 Server Error) to demonstrate error snackbars/banners.
 
-*Test Credentials (from `mock-data.json`):*
-- **Email**: `ava.admin@nimbusdigital.test` / **Password**: `Password123!`
+### Test Credentials
+Use the following credentials from `mock-data.json` to test role-based behavior. **Password for all is `Password123!`**.
+
+**Org A: Nimbus Digital**
+- **Admin**: `ava.admin@nimbusdigital.test`
+- **Member**: `marcus.member@nimbusdigital.test`
+
+**Org B: Harborlight Studios**
+- **Admin**: `daniel.admin@harborlightstudios.test`
+- **Member**: `elena.member@harborlightstudios.test`
 
 ## Known Limitations and Technical Decisions/Trade-offs
 1. **In-Memory State Loss**: Since the mock backend executes operations purely in memory, performing a full app hot-restart will wipe out mutations (new tasks/projects) created in the session unless they were stored in the offline sync queue.
