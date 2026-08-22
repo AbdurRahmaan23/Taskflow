@@ -287,7 +287,7 @@
 	"notifications": [
 		{
 			"id": "notif_4001",
-			"user_id": "user_002",
+			"user_id": "user_001",
 			"type": "task_assigned",
 			"task_id": "task_2004",
 			"message": "You were assigned to \"Fix broken contact form\"",
