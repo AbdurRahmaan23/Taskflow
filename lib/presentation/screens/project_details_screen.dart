@@ -147,6 +147,7 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
             children: [
               Expanded(
                 child: DropdownButtonFormField<String?>(
+                  isExpanded: true,
                   decoration: const InputDecoration(labelText: 'Status', isDense: true),
                   value: _filterStatus,
                   items: const [
@@ -162,6 +163,7 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
               const SizedBox(width: 16),
               Expanded(
                 child: DropdownButtonFormField<String?>(
+                  isExpanded: true,
                   decoration: const InputDecoration(labelText: 'Priority', isDense: true),
                   value: _filterPriority,
                   items: const [
@@ -181,6 +183,7 @@ class _ProjectDetailsScreenState extends ConsumerState<ProjectDetailsScreen> {
             children: [
               Expanded(
                 child: DropdownButtonFormField<String?>(
+                  isExpanded: true,
                   decoration: const InputDecoration(labelText: 'Assignee', isDense: true),
                   value: _filterAssignee,
                   items: [

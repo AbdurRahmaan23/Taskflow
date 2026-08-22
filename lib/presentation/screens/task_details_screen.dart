@@ -178,6 +178,7 @@ class _TaskDetailsScreenState extends ConsumerState<TaskDetailsScreen> {
                     TextField(controller: descController, decoration: const InputDecoration(labelText: 'Description')),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
+                      isExpanded: true,
                       value: selectedPriority,
                       decoration: const InputDecoration(labelText: 'Priority'),
                       items: ['low', 'medium', 'high', 'urgent'].map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
