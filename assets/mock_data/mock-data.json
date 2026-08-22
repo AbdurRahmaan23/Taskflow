@@ -318,24 +318,28 @@
 		"_comment": "Use this to simulate the login endpoint locally. Match email+password, return the mock_login_response below. No real network call or backend is required.",
 		"test_credentials": [
 			{
+				"id": "user_001",
 				"email": "ava.admin@nimbusdigital.test",
 				"password": "Password123!",
 				"org_id": "org_a1b2c3",
 				"role": "org_admin"
 			},
 			{
+				"id": "user_002",
 				"email": "marcus.member@nimbusdigital.test",
 				"password": "Password123!",
 				"org_id": "org_a1b2c3",
 				"role": "member"
 			},
 			{
+				"id": "user_004",
 				"email": "daniel.admin@harborlightstudios.test",
 				"password": "Password123!",
 				"org_id": "org_d4e5f6",
 				"role": "org_admin"
 			},
 			{
+				"id": "user_005",
 				"email": "elena.member@harborlightstudios.test",
 				"password": "Password123!",
 				"org_id": "org_d4e5f6",

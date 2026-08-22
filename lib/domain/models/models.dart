@@ -72,6 +72,7 @@ abstract class Task with _$Task {
 @freezed
 abstract class AuthCredentials with _$AuthCredentials {
   const factory AuthCredentials({
+    required String id,
     required String email,
     required String password,
     @JsonKey(name: 'org_id') required String orgId,
