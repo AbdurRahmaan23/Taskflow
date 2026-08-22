@@ -50,7 +50,7 @@ void main() {
     });
 
     test('login successfully sets user state', () async {
-      const mockUser = AuthCredentials(email: 'test@test.com', password: '', orgId: 'org1', role: 'member');
+      const mockUser = AuthCredentials(id: 'user_1', email: 'test@test.com', password: '', orgId: 'org1', role: 'member');
       when(() => mockAuthRepo.isLoggedIn()).thenAnswer((_) async => false);
       when(() => mockAuthRepo.login('test@test.com', 'password')).thenAnswer((_) async => const MockLoginResponse(accessToken: '', refreshToken: '', accessTokenExpiresIn: 0, refreshTokenExpiresIn: 0));
       when(() => mockAuthRepo.getCurrentUser()).thenAnswer((_) async => mockUser);
